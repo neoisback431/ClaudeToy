@@ -6,19 +6,71 @@ Claude Code, qui réagit à ce que fait Claude (au travail, en attente de valida
 
 *A tiny physical Claude Desktop companion on an ESP32-S3 + round GC9A01 display, with touch buttons to approve or deny
 permission prompts. Port of the official [claude-desktop-buddy](https://github.com/anthropics/claude-desktop-buddy)
-(M5StickC Plus) to other hardware.*
+(M5StickC Plus) to other hardware, with a 3D-printable case.*
+
+<table>
+  <tr>
+    <td align="center"><img src="images/3dFront.png" alt="Vue de face du boîtier" width="360"><br><sub>Face avant : l'écran rond sur la face inclinée</sub></td>
+    <td align="center"><img src="images/3dBack.png" alt="Vue en coupe du boîtier" width="440"><br><sub>Vue arrière (trappe retirée) : ESP32-S3 et modules dans le corps</sub></td>
+  </tr>
+</table>
 
 > Projet communautaire non officiel, sans lien avec Anthropic. La fonction « Hardware Buddy » de Claude Desktop est
 > réservée au mode développeur et n'est pas une fonctionnalité officiellement supportée.
 
-## Matériel
+## Ce que ça fait
 
-- ESP32-S3 Super Mini (le C3 ne convient pas : pas de BLE 5 confortable ni de tactile natif)
-- Écran rond GC9A01 1,28" SPI 240×240
-- 1 ou 2 modules tactiles type TTP223
-- (Optionnel, non implémenté dans le firmware) batterie Li-ion + chargeur : voir [BATTERY.md](BATTERY.md)
+<p align="center"><img src="images/clawd_states.png" alt="Les 7 états de Clawd" width="720"><br><sub>Les sept états de Clawd (rendu illustratif de l'animation du firmware)</sub></p>
 
-Câblage complet : [WIRING.md](WIRING.md).
+- **Clawd réagit à Claude** : il dort, attend, travaille, s'inquiète quand une permission est demandée, fête une réussite…
+- **Approbation physique** : tap pour approuver, un autre geste (ou un 2e bouton) pour refuser.
+- **Écran de veille** : heure et date, tokens du jour, niveau et progression, sessions en cours/en attente,
+  état du Bluetooth, dernier message de Claude.
+- **Bluetooth LE chiffré** avec appairage par code à 6 chiffres affiché à l'écran.
+
+## Nomenclature (BOM)
+
+| Qté | Composant | Remarque |
+| --- | --------- | -------- |
+| 1 | ESP32-S3 Super Mini | USB natif et BLE 5. Ne convient pas : ESP32-C3 (pas de tactile natif, moins à l'aise) ni ESP8266 (pas de BLE) |
+| 1 | Écran rond GC9A01 1,28" SPI, 240×240 | Versions à 7 ou 8 broches ; la broche BLK (rétroéclairage) est facultative |
+| 1 à 2 | Module tactile capacitif TTP223 | 1 en mode 1 bouton, 2 en mode 2 boutons |
+| 1 | Câble USB-C (données) | Alimentation et flash |
+| — | Fils souples ou Dupont, barrettes à souder | 7 à 8 fils pour l'écran, 3 par module tactile |
+| — | Fixations (vis, colle) | Selon ton montage |
+| 1 | Corps principal imprimé en 3D | [`3dParts/Corps principal.stl`](3dParts/Corps%20principal.stl) |
+| 1 | Trappe imprimée en 3D | [`3dParts/Trappe.stl`](3dParts/Trappe.stl) |
+
+Optionnel, **non géré par le firmware** : accu Li-ion rechargeable et chargeur, schéma dans [BATTERY.md](BATTERY.md).
+
+## Câblage
+
+<p align="center"><img src="docs/wiring.svg" alt="Schéma de câblage" width="760"></p>
+
+| Écran GC9A01 | ESP32-S3 |   | Module tactile | ESP32-S3 |
+| ------------ | -------- | - | -------------- | -------- |
+| VCC | 3V3 | | A : OUT | GPIO 4 |
+| GND | GND | | B : OUT (optionnel) | GPIO 2 |
+| SCL | GPIO 5 | | VCC (A et B) | 3V3 |
+| SDA | GPIO 6 | | GND (A et B) | GND |
+| CS | GPIO 7 | | | |
+| DC | GPIO 8 | | | |
+| RST | GPIO 9 | | | |
+| BLK (si présent) | GPIO 10 | | | |
+
+Détails et conseils : [WIRING.md](WIRING.md).
+
+## Boîtier 3D
+
+| Fichier | Contenu |
+| ------- | ------- |
+| [`3dParts/Corps principal.stl`](3dParts/Corps%20principal.stl) | Corps cylindrique, environ 60 × 60 × 74 mm, face supérieure inclinée pour l'écran |
+| [`3dParts/Trappe.stl`](3dParts/Trappe.stl) | Trappe d'accès, environ 22 × 58 × 71 mm |
+| [`3dParts/claude_toy.f3z`](3dParts/claude_toy.f3z) | Projet complet Fusion (archive) |
+| [`3dParts/claud_toy.f3d`](3dParts/claud_toy.f3d) | Modèle Fusion |
+
+Les dimensions ci-dessus sont lues dans les fichiers STL. Les fichiers Fusion permettent d'adapter le boîtier
+(emplacement des modules, taille de la carte).
 
 ## Compiler et flasher
 

@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" width="900" height="700" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <rect width="900" height="700" fill="#ffffff"/>
+  <text x="450" y="30" text-anchor="middle" font-size="20" font-weight="600" fill="#1f2328">ClaudeToy — schéma de câblage</text>
+
+  <!-- ESP32-S3 Super Mini -->
+  <rect x="40" y="55" width="230" height="535" rx="10" fill="#eef3ff" stroke="#3b5bdb" stroke-width="2"/>
+  <text x="155" y="82" text-anchor="middle" font-size="16" font-weight="600" fill="#1f2328">ESP32-S3 Super Mini</text>
+  <text x="155" y="102" text-anchor="middle" font-size="11" fill="#57606a">USB-C : alimentation + flash</text>
+
+  <!-- Écran GC9A01 -->
+  <rect x="620" y="55" width="240" height="355" rx="10" fill="#fff4ec" stroke="#d9480f" stroke-width="2"/>
+  <text x="740" y="82" text-anchor="middle" font-size="16" font-weight="600" fill="#1f2328">Écran rond GC9A01</text>
+  <text x="740" y="100" text-anchor="middle" font-size="11" fill="#57606a">1,28" · SPI · 240×240</text>
+
+  <!-- Boutons -->
+  <rect x="620" y="425" width="240" height="75" rx="10" fill="#f3f0ff" stroke="#6741d9" stroke-width="2"/>
+  <text x="740" y="444" text-anchor="middle" font-size="14" font-weight="600" fill="#1f2328">Bouton A · TTP223</text>
+  <rect x="620" y="510" width="240" height="75" rx="10" fill="#f3f0ff" stroke="#6741d9" stroke-width="2"/>
+  <text x="740" y="529" text-anchor="middle" font-size="14" font-weight="600" fill="#1f2328">Bouton B · TTP223 (optionnel)</text>
+
+  <!-- Signaux ESP -> écran (lignes horizontales) -->
+  <g stroke-width="3" stroke-linecap="round">
+    <line x1="270" y1="125" x2="620" y2="125" stroke="#e03131"/>
+    <line x1="270" y1="160" x2="620" y2="160" stroke="#212529"/>
+    <line x1="270" y1="195" x2="620" y2="195" stroke="#1971c2"/>
+    <line x1="270" y1="230" x2="620" y2="230" stroke="#2f9e44"/>
+    <line x1="270" y1="265" x2="620" y2="265" stroke="#f08c00"/>
+    <line x1="270" y1="300" x2="620" y2="300" stroke="#9c36b5"/>
+    <line x1="270" y1="335" x2="620" y2="335" stroke="#0c8599"/>
+    <line x1="270" y1="370" x2="620" y2="370" stroke="#868e96" stroke-dasharray="6 6"/>
+    <line x1="270" y1="465" x2="620" y2="465" stroke="#c2255c"/>
+    <line x1="270" y1="550" x2="620" y2="550" stroke="#c2255c" stroke-dasharray="6 6"/>
+  </g>
+
+  <!-- Broches ESP (côté droit de la carte) -->
+  <g font-size="13" fill="#1f2328">
+    <circle cx="270" cy="125" r="5" fill="#e03131"/><text x="258" y="130" text-anchor="end">3V3</text>
+    <circle cx="270" cy="160" r="5" fill="#212529"/><text x="258" y="165" text-anchor="end">GND</text>
+    <circle cx="270" cy="195" r="5" fill="#1971c2"/><text x="258" y="200" text-anchor="end">GPIO 5</text>
+    <circle cx="270" cy="230" r="5" fill="#2f9e44"/><text x="258" y="235" text-anchor="end">GPIO 6</text>
+    <circle cx="270" cy="265" r="5" fill="#f08c00"/><text x="258" y="270" text-anchor="end">GPIO 7</text>
+    <circle cx="270" cy="300" r="5" fill="#9c36b5"/><text x="258" y="305" text-anchor="end">GPIO 8</text>
+    <circle cx="270" cy="335" r="5" fill="#0c8599"/><text x="258" y="340" text-anchor="end">GPIO 9</text>
+    <circle cx="270" cy="370" r="5" fill="#868e96"/><text x="258" y="375" text-anchor="end">GPIO 10</text>
+    <circle cx="270" cy="465" r="5" fill="#c2255c"/><text x="258" y="470" text-anchor="end">GPIO 4</text>
+    <circle cx="270" cy="550" r="5" fill="#c2255c"/><text x="258" y="555" text-anchor="end">GPIO 2</text>
+  </g>
+
+  <!-- Broches écran (côté gauche du module) -->
+  <g font-size="13" fill="#1f2328">
+    <circle cx="620" cy="125" r="5" fill="#e03131"/><text x="632" y="130">VCC</text>
+    <circle cx="620" cy="160" r="5" fill="#212529"/><text x="632" y="165">GND</text>
+    <circle cx="620" cy="195" r="5" fill="#1971c2"/><text x="632" y="200">SCL (CLK)</text>
+    <circle cx="620" cy="230" r="5" fill="#2f9e44"/><text x="632" y="235">SDA (MOSI)</text>
+    <circle cx="620" cy="265" r="5" fill="#f08c00"/><text x="632" y="270">CS</text>
+    <circle cx="620" cy="300" r="5" fill="#9c36b5"/><text x="632" y="305">DC</text>
+    <circle cx="620" cy="335" r="5" fill="#0c8599"/><text x="632" y="340">RST</text>
+    <circle cx="620" cy="370" r="5" fill="#868e96"/><text x="632" y="375">BLK (si présent)</text>
+  </g>
+
+  <!-- Boutons: OUT relié, VCC/GND vers les rails -->
+  <g font-size="13" fill="#1f2328">
+    <circle cx="620" cy="465" r="5" fill="#c2255c"/><text x="632" y="470">OUT</text>
+    <circle cx="620" cy="550" r="5" fill="#c2255c"/><text x="632" y="555">OUT</text>
+    <text x="760" y="465" font-size="12" fill="#e03131">VCC → 3V3</text>
+    <text x="760" y="483" font-size="12" fill="#212529">GND → GND</text>
+    <text x="760" y="550" font-size="12" fill="#e03131">VCC → 3V3</text>
+    <text x="760" y="568" font-size="12" fill="#212529">GND → GND</text>
+  </g>
+
+  <!-- Légende -->
+  <g font-size="13" fill="#57606a">
+    <text x="40" y="625">Tous les GND sont reliés ensemble. Alimentation en 3,3 V uniquement (jamais 5 V sur l'écran).</text>
+    <text x="40" y="647">Trait pointillé : liaison facultative (BLK absent sur certains modules ; bouton B uniquement en mode 2 boutons).</text>
+    <text x="40" y="669">Bouton A : tap = approuver / suivant ; appui long = menu (2 boutons) ou refuser (1 bouton).  Bouton B : refuser / valider / page suivante.</text>
+  </g>
+</svg>

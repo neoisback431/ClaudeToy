@@ -1,4 +1,6 @@
-# Câblage — ESP32-S3 Super Mini + GC9A01 1.28" + pad tactile
+# Câblage — ESP32-S3 Super Mini + GC9A01 1.28" + boutons tactiles
+
+![Schéma de câblage](docs/wiring.svg)
 
 | Écran GC9A01 | ESP32-S3 Super Mini | Note |
 | ------------ | ------------------- | ---- |
@@ -9,7 +11,7 @@
 | DC           | GPIO 8              | |
 | CS           | GPIO 7              | |
 | RST          | GPIO 9              | |
-| BLK          | GPIO 10             | rétroéclairage, PWM (variateur de luminosité) |
+| BLK          | GPIO 10             | rétroéclairage, PWM (variateur) ; **facultatif** : certains modules n'ont pas cette broche (rétroéclairage toujours allumé) |
 
 | Périphérique            | Broche    | Note |
 | ----------------------- | --------- | ---- |
