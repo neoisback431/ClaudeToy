@@ -1,0 +1,6 @@
+.pio/
+.vscode/
+.DS_Store
+data/
+characters/
+__pycache__/
