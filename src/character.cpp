@@ -141,8 +141,12 @@ bool characterInit(const char* name) {
   if (!LittleFS.begin(false)) {
     // begin() fails if already mounted — that's fine on reload
     if (!LittleFS.open("/")) {
-      Serial.println("[char] LittleFS mount failed");
-      return false;
+      // Fresh chip: no filesystem yet. Nothing to lose, so format on the failed mount.
+      Serial.println("[char] LittleFS mount failed, formatting");
+      if (!LittleFS.begin(true)) {
+        Serial.println("[char] LittleFS format failed");
+        return false;
+      }
     }
   }
 

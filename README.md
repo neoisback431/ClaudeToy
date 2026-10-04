@@ -54,7 +54,7 @@ la demande de permission en cours (outil + commande), l'heure et ton prénom. Ri
 | ---- | ----------- |
 | sleep | nuit (1 h – 7 h), week-end, ou les 12 s après le réveil de l'écran |
 | idle | connecté, rien d'urgent |
-| busy | plusieurs sessions (3 ou plus) en cours |
+| busy | au moins une session en cours (le projet d'origine attendait 3 sessions) |
 | attention | une permission attend ta réponse |
 | celebrate | tâche terminée, ou niveau gagné |
 | heart | permission approuvée en moins de 5 s |

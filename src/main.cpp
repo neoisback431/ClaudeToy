@@ -500,7 +500,7 @@ PersonaState derive(const TamaState& s) {
   if (!s.connected)            return P_IDLE;
   if (s.sessionsWaiting > 0)   return P_ATTENTION;
   if (s.recentlyCompleted)     return P_CELEBRATE;
-  if (s.sessionsRunning >= 3)  return P_BUSY;
+  if (s.sessionsRunning >= 1)  return P_BUSY;   // upstream waits for 3 sessions
   return P_IDLE;   // connected, 0+ sessions, nothing urgent — hang out
 }
 
@@ -758,12 +758,14 @@ static uint8_t wrapInto(const char* in, char out[][24], uint8_t maxRows, uint8_t
 static void drawApproval() {
   const Palette& p = characterPalette();
   const int AREA = 78;
-  spr.fillRect(0, H - AREA, W, AREA, p.bg);
-  spr.drawFastHLine(0, H - AREA, W, p.textDim);
+  const int LIFT = 24;                 // raise the whole prompt block above the round panel's lower edge
+  const int B = H - LIFT;              // block bottom
+  spr.fillRect(0, B - AREA, W, H - (B - AREA), p.bg);
+  spr.drawFastHLine(0, B - AREA, W, p.textDim);
 
   spr.setTextSize(1);
   spr.setTextColor(p.textDim, p.bg);
-  spr.setCursor(4, H - AREA + 4);
+  spr.setCursor(4, B - AREA + 4);
   uint32_t waited = (millis() - promptArrivedMs) / 1000;
   if (waited >= 10) spr.setTextColor(HOT, p.bg);
   spr.printf("approve? %lus", (unsigned long)waited);
@@ -772,30 +774,30 @@ static void drawApproval() {
   int toolLen = strlen(tama.promptTool);
   spr.setTextColor(p.text, p.bg);
   spr.setTextSize(toolLen <= 10 ? 2 : 1);
-  spr.setCursor(4, H - AREA + (toolLen <= 10 ? 14 : 18));
+  spr.setCursor(4, B - AREA + (toolLen <= 10 ? 14 : 18));
   spr.print(tama.promptTool);
   spr.setTextSize(1);
 
   // Hint wraps at ~21 chars to two lines under the tool name
   spr.setTextColor(p.textDim, p.bg);
   int hlen = strlen(tama.promptHint);
-  spr.setCursor(4, H - AREA + 34);
+  spr.setCursor(4, B - AREA + 34);
   spr.printf("%.21s", tama.promptHint);
   if (hlen > 21) {
-    spr.setCursor(4, H - AREA + 42);
+    spr.setCursor(4, B - AREA + 42);
     spr.printf("%.21s", tama.promptHint + 21);
   }
 
   if (responseSent) {
     spr.setTextColor(p.textDim, p.bg);
-    spr.setCursor(4, H - 12);
+    spr.setCursor(4, B - 12);
     spr.print("sent...");
   } else {
     spr.setTextColor(GREEN, p.bg);
-    spr.setCursor(4, H - 12);
+    spr.setCursor(4, B - 12);
     spr.print(HINT_APPROVE);
     spr.setTextColor(HOT, p.bg);
-    spr.setCursor(W - HINT_DENY_DX, H - 12);
+    spr.setCursor(W - HINT_DENY_DX, B - 12);
     spr.print(HINT_DENY);
   }
 }
@@ -930,14 +932,15 @@ void drawHUD() {
   const Palette& p = characterPalette();
   const int SHOW = 3, LH = 8, WIDTH = 21;
   const int AREA = SHOW * LH + 4;
-  spr.fillRect(0, H - AREA, W, AREA, p.bg);
+  const int B = H - 10;                // lifted off the round panel's lower edge
+  spr.fillRect(0, B - AREA, W, H - (B - AREA), p.bg);
   spr.setTextSize(1);
 
   if (tama.lineGen != lastLineGen) { msgScroll = 0; lastLineGen = tama.lineGen; wake(); }
 
   if (tama.nLines == 0) {
     spr.setTextColor(p.text, p.bg);
-    spr.setCursor(4, H - LH - 2);
+    spr.setCursor(4, B - LH - 2);
     spr.print(tama.msg);
     return;
   }
@@ -963,12 +966,12 @@ void drawHUD() {
     uint8_t row = start + i;
     bool fresh = (srcOf[row] == newest) && (msgScroll == 0);
     spr.setTextColor(fresh ? p.text : p.textDim, p.bg);
-    spr.setCursor(4, H - AREA + 2 + i * LH);
+    spr.setCursor(4, B - AREA + 2 + i * LH);
     spr.print(disp[row]);
   }
   if (msgScroll > 0) {
     spr.setTextColor(p.body, p.bg);
-    spr.setCursor(W - 18, H - LH - 2);
+    spr.setCursor(W - 18, B - LH - 2);
     spr.printf("-%u", msgScroll);
   }
 }
@@ -1114,11 +1117,14 @@ void loop() {
   static uint32_t lastLog = 0;
   if (now - lastLog > 2000) {
     lastLog = now;
-    Serial.printf("[dbg] up=%lus heap=%u ble=%d sec=%d A=%d B=%d disp=%u state=%s screenOff=%d\n",
+    Serial.printf("[dbg] up=%lus heap=%u ble=%d sec=%d A=%d B=%d disp=%u state=%s screenOff=%d | tot=%u run=%u wait=%u conn=%d age=%lus tok=%lu lines=%u prompt=%s\n",
                   (unsigned long)(now / 1000), (unsigned)ESP.getFreeHeap(),
                   (int)bleConnected(), (int)bleSecure(),
                   (int)M5.BtnA.isPressed(), (int)M5.BtnB.isPressed(),
-                  (unsigned)displayMode, stateNames[activeState], (int)screenOff);
+                  (unsigned)displayMode, stateNames[activeState], (int)screenOff,
+                  tama.sessionsTotal, tama.sessionsRunning, tama.sessionsWaiting, (int)tama.connected,
+                  (unsigned long)((now - tama.lastUpdated) / 1000), (unsigned long)tama.tokensToday,
+                  tama.nLines, tama.promptId[0] ? tama.promptId : "-");
   }
 #endif
 
