@@ -28,6 +28,37 @@ permission prompts. Port of the official [claude-desktop-buddy](https://github.c
   état du Bluetooth, dernier message de Claude.
 - **Bluetooth LE chiffré** avec appairage par code à 6 chiffres affiché à l'écran.
 
+## Informations affichées
+
+Tout vient de Claude Desktop, par Bluetooth LE : l'état des sessions, les tokens, les dernières lignes du transcript,
+la demande de permission en cours (outil + commande), l'heure et ton prénom. Rien ne transite par Internet.
+
+| Écran | Quand | Contenu |
+| ----- | ----- | ------- |
+| **Veille** | aucune session en cours ni en attente | Heure (deux-points clignotants) et date ; **tokens du jour** ; **niveau** (Lv) avec barre de progression vers le suivant (50 000 tokens par niveau) ; sessions **en cours** et **en attente** ; état du **Bluetooth** (vert = chiffré, orange = non chiffré, gris = déconnecté) ; **dernier message** de Claude sur 2 lignes |
+| **Activité** | au moins une session en cours | Clawd en grand et les 3 dernières lignes du transcript (défilement avec le bouton B) |
+| **Demande de permission** | Claude attend une validation | Délai d'attente (rouge après 10 s), **nom de l'outil** (ex. `Bash`), **commande ou fichier concerné** sur 2 lignes, rappel des gestes pour approuver ou refuser |
+| **Pet** (tap pour y accéder) | à la demande | Page 1 : humeur (4 cœurs), faim (10 pastilles), énergie, niveau, nombre d'approbations et de refus, tokens totaux et du jour. Page 2 : explications |
+| **Info** (tap) | à la demande | 6 pages : à propos, boutons, **Claude** (sessions, état du lien, ancienneté du dernier message), **appareil** (durée de fonctionnement, mémoire libre, luminosité), **Bluetooth** (nom `Claude-XXXX`, adresse, marche à suivre), crédits |
+| **Menu** (appui long ou double tap) | à la demande | Réglages (luminosité, son, LED, ordre des écrans, changement d'animal, réinitialisation), éteindre, aide, mode démo |
+| **Appairage** | première connexion | Code à 6 chiffres à saisir sur l'ordinateur |
+| **Démarrage** | allumage | « Hello! » ou « *Prénom*'s Clawd » |
+
+### Les états de Clawd
+
+| État | Déclencheur |
+| ---- | ----------- |
+| sleep | nuit (1 h – 7 h), week-end, ou les 12 s après le réveil de l'écran |
+| idle | connecté, rien d'urgent |
+| busy | plusieurs sessions (3 ou plus) en cours |
+| attention | une permission attend ta réponse |
+| celebrate | tâche terminée, ou niveau gagné |
+| heart | permission approuvée en moins de 5 s |
+| dizzy | secousse (nécessite un IMU, absent de ce montage) |
+
+Sans IMU et sans batterie, certaines valeurs restent figées : la sieste et l'énergie ne varient pas, et l'écran
+« appareil » affiche 0 % de batterie.
+
 ## Nomenclature (BOM)
 
 | Qté | Composant | Remarque |
@@ -84,12 +115,17 @@ de l'S3). Si la carte n'est pas détectée : maintenir **BOOT**, rebrancher l'US
 
 ## Appairage avec Claude Desktop
 
-1. Dans Claude Desktop : `Help → Troubleshooting → Enable Developer Mode`.
+**Documentation officielle :** [section « Pairing » du dépôt claude-desktop-buddy](https://github.com/anthropics/claude-desktop-buddy#pairing)
+et [protocole détaillé (REFERENCE.md)](https://github.com/anthropics/claude-desktop-buddy/blob/main/REFERENCE.md#enabling-the-bridge).
+
+En résumé :
+
+1. Dans Claude Desktop (macOS ou Windows) : `Help → Troubleshooting → Enable Developer Mode`.
 2. `Developer → Open Hardware Buddy…` puis **Connect** et choisir `Claude-XXXX`.
 3. Saisir le code à 6 chiffres affiché sur l'écran.
 
-Le protocole (Bluetooth LE, Nordic UART, JSON) est documenté dans le dépôt d'origine
-([REFERENCE.md](https://github.com/anthropics/claude-desktop-buddy/blob/main/REFERENCE.md)).
+Ensuite, la reconnexion est automatique. Le pont Bluetooth n'est disponible qu'en mode développeur : ce n'est pas une
+fonctionnalité officiellement supportée.
 
 ## Boutons
 
