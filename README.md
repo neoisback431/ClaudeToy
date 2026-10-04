@@ -15,6 +15,10 @@ permission prompts. Port of the official [claude-desktop-buddy](https://github.c
   </tr>
 </table>
 
+> **Base logicielle :** la partie logicielle de ce projet (firmware, protocole Bluetooth, animaux, menus, statistiques) repose en grande
+> partie sur le projet [anthropics/claude-desktop-buddy](https://github.com/anthropics/claude-desktop-buddy) (licence MIT, © Anthropic, PBC),
+> adapté ici à d'autres composants. Voir [Licence et crédits](#licence-et-crédits).
+>
 > Projet communautaire non officiel, sans lien avec Anthropic. La fonction « Hardware Buddy » de Claude Desktop est
 > réservée au mode développeur et n'est pas une fonctionnalité officiellement supportée.
 
@@ -157,6 +161,18 @@ Mode 1 bouton (commenter `BUDDY_BTNB_PIN`) : tap = A, appui long = B, double tap
 
 ## Licence et crédits
 
-Code basé sur [anthropics/claude-desktop-buddy](https://github.com/anthropics/claude-desktop-buddy)
-(licence MIT, © 2026 Anthropic, PBC) : voir [LICENSE](LICENSE). Clawd est la mascotte de Claude Code ;
-le dessin pixel-art de ce dépôt est une réinterprétation non officielle.
+**Ce projet est un dérivé de [anthropics/claude-desktop-buddy](https://github.com/anthropics/claude-desktop-buddy)**
+(licence MIT, © 2026 Anthropic, PBC). La partie logicielle s'appuie en grande partie sur ce dépôt, repris et adapté :
+
+| Repris du projet d'origine (avec adaptations légères) | Ajouté ou réécrit ici |
+| ------------------------------------------------------ | --------------------- |
+| Protocole Bluetooth LE et appairage chiffré (`ble_bridge`) | Couche de compatibilité M5StickC Plus → ESP32-S3 (`M5StickCPlus.h`, `m5shim.cpp`) |
+| Réception des données de Claude Desktop, statistiques, niveaux (`data.h`, `stats.h`, `xfer.h`) | Espèce `clawd` en pixel-art et ses animations |
+| Moteur d'animation, 18 animaux ASCII, personnages GIF (`buddy`, `character`, `buddies/`) | Tableau de bord de veille |
+| Menus, réglages, écrans Pet et Info, scripts `tools/` | Gestes sur boutons tactiles, mode 1 ou 2 boutons |
+| | Câblage, documentation, boîtier 3D |
+
+La licence MIT d'origine est conservée telle quelle dans [LICENSE](LICENSE), comme elle l'exige. Merci aux auteurs du
+projet d'origine, dont le dépôt contient aussi la documentation complète du protocole.
+
+Clawd est la mascotte de Claude Code ; le dessin pixel-art de ce dépôt est une réinterprétation non officielle.
