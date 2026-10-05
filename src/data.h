@@ -21,6 +21,21 @@ struct TamaState {
   char     promptHint[44];
 };
 
+// Extra Claude Code info pushed over USB serial by tools/claudetoy_statusline.py:
+//   {"cc":{"m":"Opus 4.5","e":"high","c":42,"h":23,"d":41}}
+// m = model, e = effort level, c = context used %, h = 5-hour quota %, d = 7-day quota %
+// (-1 = unknown). Kept apart from TamaState so it never affects the Bluetooth link state.
+struct CcInfo {
+  char     model[16];
+  char     effort[8];
+  int8_t   ctx, h5, d7;
+  uint32_t updatedMs;
+};
+static CcInfo _cc = { "", "", -1, -1, -1, 0 };
+inline const CcInfo& ccInfo() { return _cc; }
+// Fresh while updates keep arriving (the status line refreshes every few seconds).
+inline bool ccFresh() { return _cc.updatedMs != 0 && (millis() - _cc.updatedMs) <= 120000; }
+
 // ---------------------------------------------------------------------------
 // Three modes, checked in priority order:
 //   demo   → auto-cycle fake scenarios every 8s, ignore live data
@@ -70,6 +85,28 @@ inline bool dataRtcValid() { return _rtcValid; }
 static void _applyJson(const char* line, TamaState* out) {
   JsonDocument doc;
   if (deserializeJson(doc, line)) return;
+#ifdef BUDDY_DEBUG_LOG
+  { // field names only (no content) so we can see which data Claude Desktop sends
+    Serial.print("[rx keys]");
+    for (JsonPair kv : doc.as<JsonObject>()) { Serial.print(' '); Serial.print(kv.key().c_str()); }
+    Serial.println();
+  }
+#endif
+  {
+    JsonObject cc = doc["cc"];
+    if (!cc.isNull()) {
+      strlcpy(_cc.model,  cc["m"] | "", sizeof(_cc.model));
+      strlcpy(_cc.effort, cc["e"] | "", sizeof(_cc.effort));
+      _cc.ctx = (int8_t)constrain((int)(cc["c"] | -1), -1, 100);
+      _cc.h5  = (int8_t)constrain((int)(cc["h"] | -1), -1, 100);
+      _cc.d7  = (int8_t)constrain((int)(cc["d"] | -1), -1, 100);
+      _cc.updatedMs = millis();
+#ifdef BUDDY_DEBUG_LOG
+      Serial.printf("[cc] m=%s e=%s c=%d h=%d d=%d\n", _cc.model, _cc.effort, _cc.ctx, _cc.h5, _cc.d7);
+#endif
+      return;   // not a Bluetooth heartbeat: leave link state alone
+    }
+  }
   if (xferCommand(doc)) { _lastLiveMs = millis(); return; }
 
   // Bridge sends {"time":[epoch_sec, tz_offset_sec]}; gmtime_r on the

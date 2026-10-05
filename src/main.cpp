@@ -622,6 +622,20 @@ void drawInfo() {
     uint32_t age = (millis() - tama.lastUpdated) / 1000;
     ln("  last msg  %lus", (unsigned long)age);
     ln("  state     %s", stateNames[activeState]);
+    if (ccFresh()) {
+      const CcInfo& c = ccInfo();
+      y += 4;
+      spr.setTextColor(p.text, p.bg);
+      ln("  %.10s %.5s", c.model, c.effort);
+      spr.setTextColor(p.textDim, p.bg);
+      if (c.ctx >= 0) ln("  context   %d%%", c.ctx);
+      if (c.h5 >= 0 || c.d7 >= 0) {
+        char q[32] = "  quota";
+        if (c.h5 >= 0) snprintf(q + strlen(q), sizeof(q) - strlen(q), "  5h %d%%", c.h5);
+        if (c.d7 >= 0) snprintf(q + strlen(q), sizeof(q) - strlen(q), "  7d %d%%", c.d7);
+        ln("%s", q);
+      }
+    }
 
   } else if (infoPage == 3) {
     _infoHeader(p, y, "DEVICE", infoPage);
@@ -976,6 +990,36 @@ void drawHUD() {
   }
 }
 
+// ── Context ring ───────────────────────────────────────────────────────
+// 60 dots on the edge of the round panel, filled clockwise from the top with the
+// context-window usage Claude Code reports (see tools/claudetoy_statusline.py).
+// The sprite covers part of the ring, so it is drawn twice: into the sprite every
+// frame (clipped to it) and straight to the panel whenever the value changes.
+static const int RING_N = 60, RING_R = 115, RING_DOT = 2;
+
+static uint16_t ringColor(int pct) {
+  return pct < 60 ? 0x07E0 : pct < 80 ? 0xFFE0 : pct < 90 ? HOT : 0xF800;
+}
+
+static void drawRing(TFT_eSPI* t, int ox, int oy, bool erase) {
+  static int16_t px[RING_N], py[RING_N];
+  static bool init = false;
+  if (!init) {
+    for (int i = 0; i < RING_N; i++) {
+      float a = -M_PI / 2 + 2 * M_PI * i / RING_N;
+      px[i] = 120 + (int)lroundf(RING_R * cosf(a));
+      py[i] = 120 + (int)lroundf(RING_R * sinf(a));
+    }
+    init = true;
+  }
+  int pct  = ccInfo().ctx;
+  int fill = (erase || pct < 0) ? 0 : (pct * RING_N + 50) / 100;
+  uint16_t on  = ringColor(pct);
+  uint16_t off = erase ? 0x0000 : 0x2104;
+  for (int i = 0; i < RING_N; i++)
+    t->fillCircle(px[i] - ox, py[i] - oy, RING_DOT, i < fill ? on : off);
+}
+
 // ── Idle dashboard ─────────────────────────────────────────────────────
 // Shown on the home screen when no Claude session is running or waiting:
 // clock + date, tokens today, level + progress, sessions, link state, last line.
@@ -1047,13 +1091,23 @@ static void drawDashboard() {
   spr.setTextColor(lc, p.bg);
   spr.setCursor(115, y); spr.print("bt");
 
+  // Claude Code model / effort / context (pushed over USB by the status line)
+  if (ccFresh()) {
+    const CcInfo& c = ccInfo();
+    char b[28];
+    if (c.ctx >= 0) snprintf(b, sizeof(b), "%.10s %.5s %d%%", c.model, c.effort, c.ctx);
+    else            snprintf(b, sizeof(b), "%.10s %.5s", c.model, c.effort);
+    spr.setTextColor(p.body, p.bg);
+    spr.setCursor(4, 177); spr.print(b);
+  }
+
   // last transcript line (or status message), 2 rows
   const char* last = tama.nLines > 0 ? tama.lines[tama.nLines - 1] : tama.msg;
   static char rows[2][24];
   uint8_t n = wrapInto(last, rows, 2, 21);
   spr.setTextColor(p.textDim, p.bg);
   for (uint8_t i = 0; i < n; i++) {
-    spr.setCursor(4, 182 + i * 10);
+    spr.setCursor(4, 188 + i * 9);
     spr.print(rows[i]);
   }
 }
@@ -1117,14 +1171,14 @@ void loop() {
   static uint32_t lastLog = 0;
   if (now - lastLog > 2000) {
     lastLog = now;
-    Serial.printf("[dbg] up=%lus heap=%u ble=%d sec=%d A=%d B=%d disp=%u state=%s screenOff=%d | tot=%u run=%u wait=%u conn=%d age=%lus tok=%lu lines=%u prompt=%s\n",
+    Serial.printf("[dbg] up=%lus heap=%u ble=%d sec=%d A=%d B=%d disp=%u state=%s screenOff=%d | tot=%u run=%u wait=%u conn=%d age=%lus tok=%lu lines=%u prompt=%s cc=%d/%d\n",
                   (unsigned long)(now / 1000), (unsigned)ESP.getFreeHeap(),
                   (int)bleConnected(), (int)bleSecure(),
                   (int)M5.BtnA.isPressed(), (int)M5.BtnB.isPressed(),
                   (unsigned)displayMode, stateNames[activeState], (int)screenOff,
                   tama.sessionsTotal, tama.sessionsRunning, tama.sessionsWaiting, (int)tama.connected,
                   (unsigned long)((now - tama.lastUpdated) / 1000), (unsigned long)tama.tokensToday,
-                  tama.nLines, tama.promptId[0] ? tama.promptId : "-");
+                  tama.nLines, tama.promptId[0] ? tama.promptId : "-", (int)ccFresh(), (int)ccInfo().ctx);
   }
 #endif
 
@@ -1377,6 +1431,11 @@ void loop() {
     if (resetOpen) drawReset();
     else if (settingsOpen) drawSettings();
     else if (menuOpen) drawMenu();
+    // Context ring: panel copy only on change, sprite copy every frame.
+    static int ringKey = 0;
+    int key = ccFresh() ? ccInfo().ctx + 2 : 0;
+    if (key != ringKey) { ringKey = key; drawRing(&M5.Lcd, 0, 0, key == 0); }
+    if (key) drawRing(&spr, SPR_X, SPR_Y, false);
     spr.pushSprite(SPR_X, SPR_Y);
   }
 

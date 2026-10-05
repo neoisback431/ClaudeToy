@@ -39,7 +39,8 @@ la demande de permission en cours (outil + commande), l'heure et ton prénom. Ri
 
 | Écran | Quand | Contenu |
 | ----- | ----- | ------- |
-| **Veille** | aucune session en cours ni en attente | Heure (deux-points clignotants) et date ; **tokens du jour** ; **niveau** (Lv) avec barre de progression vers le suivant (50 000 tokens par niveau) ; sessions **en cours** et **en attente** ; état du **Bluetooth** (vert = chiffré, orange = non chiffré, gris = déconnecté) ; **dernier message** de Claude sur 2 lignes |
+| **Veille** | aucune session en cours ni en attente | Heure (deux-points clignotants) et date ; **tokens du jour** ; **niveau** (Lv) avec barre de progression vers le suivant (50 000 tokens par niveau) ; sessions **en cours** et **en attente** ; état du **Bluetooth** (vert = chiffré, orange = non chiffré, gris = déconnecté) ; **dernier message** de Claude sur 2 lignes ; avec la status line : **modèle, effort et % de contexte** (ex. `Opus 4.5 high 42%`) |
+| **Bague de contexte** | dès que la status line de Claude Code est branchée (voir plus bas) | 60 points autour du bord de l'écran, remplis dans le sens horaire selon le **contexte utilisé** : vert, puis jaune (60 %), orange (80 %) et rouge (90 %). Disparaît si plus rien n'arrive pendant 2 minutes |
 | **Activité** | au moins une session en cours | Clawd en grand et les 3 dernières lignes du transcript (défilement avec le bouton B) |
 | **Demande de permission** | Claude attend une validation | Délai d'attente (rouge après 10 s), **nom de l'outil** (ex. `Bash`), **commande ou fichier concerné** sur 2 lignes, rappel des gestes pour approuver ou refuser |
 | **Pet** (tap pour y accéder) | à la demande | Page 1 : humeur (4 cœurs), faim (10 pastilles), énergie, niveau, nombre d'approbations et de refus, tokens totaux et du jour. Page 2 : explications |
@@ -62,6 +63,36 @@ la demande de permission en cours (outil + commande), l'heure et ton prénom. Ri
 
 Sans IMU et sans batterie, certaines valeurs restent figées : la sieste et l'énergie ne varient pas, et l'écran
 « appareil » affiche 0 % de batterie.
+
+## Status line Claude Code (modèle, effort, contexte)
+
+Claude Desktop n'envoie par Bluetooth ni le modèle, ni le niveau d'effort, ni le contexte. Claude Code les fournit en revanche à
+sa **status line**, un script que tu configures : [`tools/claudetoy_statusline.py`](tools/claudetoy_statusline.py) affiche la
+ligne de statut habituelle et envoie à la carte, par le **port USB**, le modèle, l'effort, le % de contexte et les quotas 5 h / 7 j
+(uniquement ces champs : ni dossier de travail, ni dépôt Git).
+
+```bash
+pip install pyserial
+```
+
+Dans `~/.claude/settings.json` (réglages utilisateur de Claude Code) :
+
+```json
+"statusLine": {
+  "type": "command",
+  "command": "python C:/chemin/vers/tools/claudetoy_statusline.py",
+  "refreshInterval": 5
+}
+```
+
+Utilise des barres obliques `/` dans le chemin (Windows). Démarre une nouvelle session : la bague et la ligne de modèle apparaissent
+après la première réponse de Claude.
+
+- La carte doit être branchée en USB au PC qui exécute Claude Code. Si le port est occupé (flash, moniteur série) ou la carte absente,
+  l'envoi est simplement ignoré.
+- Les quotas 5 h / 7 j ne sont fournis que pour les abonnements Pro et Max.
+- Avec plusieurs sessions, la dernière valeur reçue s'affiche.
+- Format du message (une ligne JSON) : `{"cc":{"m":"Opus 4.5","e":"high","c":42,"h":23,"d":41}}` (`-1` = inconnu).
 
 ## Nomenclature (BOM)
 
@@ -150,6 +181,7 @@ Mode 1 bouton (commenter `BUDDY_BTNB_PIN`) : tap = A, appui long = B, double tap
 - Nouvelle espèce `clawd` ([src/buddies/clawd.cpp](src/buddies/clawd.cpp)), dessinée en pixels, avec les 7 états animés.
 - Tableau de bord de veille (heure, tokens du jour, niveau, sessions, Bluetooth, dernier message).
 - Interface réduite à 135×208 px, centrée dans le cercle.
+- Bague de contexte et ligne modèle/effort alimentées par la status line de Claude Code, via USB.
 
 ## État
 
