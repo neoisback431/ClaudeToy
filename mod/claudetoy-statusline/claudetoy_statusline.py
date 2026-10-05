@@ -11,7 +11,7 @@ Si la carte est absente ou si le port est occupé (flash, moniteur série), l'en
 
 Installation : pip install pyserial, puis dans ~/.claude/settings.json :
   "statusLine": { "type": "command",
-                  "command": "python C:/chemin/vers/tools/claudetoy_statusline.py",
+                  "command": "python C:/chemin/vers/mod/claudetoy-statusline/claudetoy_statusline.py",
                   "refreshInterval": 5 }
 """
 import json

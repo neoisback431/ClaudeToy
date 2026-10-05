@@ -1,6 +1,6 @@
 // claudetoy-statusline : alimente la bague ClaudeToy depuis Claude Code (terminal ou Desktop),
 // sans affichage. Les données viennent de l'API des mods ($.session.*) et sont passées sur stdin
-// à tools/claudetoy_statusline.py, qui les envoie sur le port série.
+// à claudetoy_statusline.py (livré dans le plugin), qui les envoie sur le port série.
 
 import type { EngineInterface, PluginOptions, Register } from 'claude-code'
 import { buildInput } from './payload'
@@ -21,7 +21,7 @@ async function push($: EngineInterface, options: PluginOptions) {
       effort,
       usage: await $.session.usage(),
     })
-    const script = String(options.script || '') || `${$.plugin.root}/../../tools/claudetoy_statusline.py`
+    const script = `${$.plugin.root}/claudetoy_statusline.py`
     await $.process.run([String(options.python || 'python'), script], {
       stdin: JSON.stringify(input),
       timeoutMs: RUN_TIMEOUT_MS,

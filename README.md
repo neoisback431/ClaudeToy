@@ -67,7 +67,7 @@ Sans IMU et sans batterie, certaines valeurs restent figées : la sieste et l'é
 ## Status line Claude Code (modèle, effort, contexte)
 
 Claude Desktop n'envoie par Bluetooth ni le modèle, ni le niveau d'effort, ni le contexte. Claude Code les fournit en revanche à
-sa **status line**, un script que tu configures : [`tools/claudetoy_statusline.py`](tools/claudetoy_statusline.py) affiche la
+sa **status line**, un script que tu configures : [`mod/claudetoy-statusline/claudetoy_statusline.py`](mod/claudetoy-statusline/claudetoy_statusline.py) affiche la
 ligne de statut habituelle et envoie à la carte, par le **port USB**, le modèle, l'effort, le % de contexte et les quotas 5 h / 7 j
 (uniquement ces champs : ni dossier de travail, ni dépôt Git).
 
@@ -80,7 +80,7 @@ Dans `~/.claude/settings.json` (réglages utilisateur de Claude Code) :
 ```json
 "statusLine": {
   "type": "command",
-  "command": "python C:/chemin/vers/tools/claudetoy_statusline.py",
+  "command": "python C:/chemin/vers/mod/claudetoy-statusline/claudetoy_statusline.py",
   "refreshInterval": 5
 }
 ```

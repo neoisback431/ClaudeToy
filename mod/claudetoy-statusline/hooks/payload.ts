@@ -1,4 +1,4 @@
-// Construit le JSON que lit tools/claudetoy_statusline.py (même forme que la status line de Claude Code).
+// Construit le JSON que lit claudetoy_statusline.py (même forme que la status line de Claude Code).
 
 import type { SessionUsage } from 'claude-code'
 
