@@ -34,7 +34,7 @@ struct CcInfo {
 static CcInfo _cc = { "", "", -1, -1, -1, 0 };
 inline const CcInfo& ccInfo() { return _cc; }
 // Fresh while updates keep arriving (the status line refreshes every few seconds).
-inline bool ccFresh() { return _cc.updatedMs != 0 && (millis() - _cc.updatedMs) <= 120000; }
+inline bool ccFresh() { return _cc.updatedMs != 0 && (millis() - _cc.updatedMs) <= 1800000; }
 
 // ---------------------------------------------------------------------------
 // Three modes, checked in priority order:

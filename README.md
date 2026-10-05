@@ -40,7 +40,7 @@ la demande de permission en cours (outil + commande), l'heure et ton prénom. Ri
 | Écran | Quand | Contenu |
 | ----- | ----- | ------- |
 | **Veille** | aucune session en cours ni en attente | Heure (deux-points clignotants) et date ; **tokens du jour** ; **niveau** (Lv) avec barre de progression vers le suivant (50 000 tokens par niveau) ; sessions **en cours** et **en attente** ; état du **Bluetooth** (vert = chiffré, orange = non chiffré, gris = déconnecté) ; **dernier message** de Claude sur 2 lignes ; avec la status line : **modèle, effort et % de contexte** (ex. `Opus 4.5 high 42%`) |
-| **Bague de contexte** | dès que la status line de Claude Code est branchée (voir plus bas) | 60 points autour du bord de l'écran, remplis dans le sens horaire selon le **contexte utilisé** : vert, puis jaune (60 %), orange (80 %) et rouge (90 %). Disparaît si plus rien n'arrive pendant 2 minutes |
+| **Bague de contexte** | dès que la status line de Claude Code est branchée (voir plus bas) | 60 points autour du bord de l'écran, remplis dans le sens horaire selon le **contexte utilisé** : vert, puis jaune (60 %), orange (80 %) et rouge (90 %). Disparaît si plus rien n'arrive pendant 30 minutes |
 | **Activité** | au moins une session en cours | Clawd en grand et les 3 dernières lignes du transcript (défilement avec le bouton B) |
 | **Demande de permission** | Claude attend une validation | Délai d'attente (rouge après 10 s), **nom de l'outil** (ex. `Bash`), **commande ou fichier concerné** sur 2 lignes, rappel des gestes pour approuver ou refuser |
 | **Pet** (tap pour y accéder) | à la demande | Page 1 : humeur (4 cœurs), faim (10 pastilles), énergie, niveau, nombre d'approbations et de refus, tokens totaux et du jour. Page 2 : explications |

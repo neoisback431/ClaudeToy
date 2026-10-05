@@ -15,7 +15,10 @@ Installation : pip install pyserial, puis dans ~/.claude/settings.json :
                   "refreshInterval": 5 }
 """
 import json
+import os
 import sys
+import tempfile
+import time
 
 ESPRESSIF_VID = 0x303A
 
@@ -43,11 +46,24 @@ def find_port():
     return None
 
 
-def push(payload):
+LAST = os.path.join(tempfile.gettempdir(), "claudetoy_statusline.last")
+
+
+def note(text):
+    """Dernier passage du script (utile pour vérifier que Claude Code l'exécute vraiment)."""
+    try:
+        with open(LAST, "w", encoding="utf-8") as f:
+            f.write("%s %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), text))
+    except Exception:
+        pass
+
+
+def push(payload, raw_info=""):
     try:
         import serial
         port = find_port()
         if not port:
+            note("aucune carte Espressif détectée")
             return
         s = serial.Serial()
         s.port = port
@@ -61,10 +77,11 @@ def push(payload):
         try:
             s.write((json.dumps(payload, separators=(",", ":")) + "\n").encode("utf-8"))
             s.flush()
+            note("envoyé sur %s : %s%s" % (port, json.dumps(payload, separators=(",", ":")), raw_info))
         finally:
             s.close()
-    except Exception:
-        pass  # carte absente, port occupé, pyserial manquant : sans importance
+    except Exception as exc:
+        note("échec : %s: %s" % (type(exc).__name__, exc))  # carte absente, port occupé, pyserial manquant...
 
 
 def main():
@@ -82,7 +99,15 @@ def main():
 
     print("[%s] effort:%s ctx:%s%%" % (model, effort or "-", ctx if ctx >= 0 else "-"))
 
-    push({"cc": {"m": model, "e": effort, "c": ctx, "h": h5, "d": d7}})
+    # Trace de diagnostic : noms des champs reçus et contenu de context_window (uniquement des nombres).
+    cw = data.get("context_window")
+    raw_info = " | champs=%s | context_window=%s | effort=%s | rate_limits=%s" % (
+        ",".join(sorted(data.keys())),
+        json.dumps(cw, separators=(",", ":")) if isinstance(cw, dict) else cw,
+        data.get("effort"),
+        "oui" if limits else "non",
+    )
+    push({"cc": {"m": model, "e": effort, "c": ctx, "h": h5, "d": d7}}, raw_info)
 
 
 if __name__ == "__main__":

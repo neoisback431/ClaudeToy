@@ -995,7 +995,7 @@ void drawHUD() {
 // context-window usage Claude Code reports (see tools/claudetoy_statusline.py).
 // The sprite covers part of the ring, so it is drawn twice: into the sprite every
 // frame (clipped to it) and straight to the panel whenever the value changes.
-static const int RING_N = 60, RING_R = 115, RING_DOT = 2;
+static const int RING_N = 60, RING_R = 104, RING_DOT = 2;
 
 static uint16_t ringColor(int pct) {
   return pct < 60 ? 0x07E0 : pct < 80 ? 0xFFE0 : pct < 90 ? HOT : 0xF800;
