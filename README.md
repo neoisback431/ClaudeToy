@@ -66,30 +66,28 @@ Sans IMU et sans batterie, certaines valeurs restent figées : la sieste et l'é
 
 ## Status line Claude Code (modèle, effort, contexte)
 
-Claude Desktop n'envoie par Bluetooth ni le modèle, ni le niveau d'effort, ni le contexte. Claude Code les fournit en revanche à
-sa **status line**, un script que tu configures : [`mod/claudetoy-statusline/claudetoy_statusline.py`](mod/claudetoy-statusline/claudetoy_statusline.py) affiche la
-ligne de statut habituelle et envoie à la carte, par le **port USB**, le modèle, l'effort, le % de contexte et les quotas 5 h / 7 j
-(uniquement ces champs : ni dossier de travail, ni dépôt Git).
+Claude Desktop n'envoie par Bluetooth ni le modèle, ni le niveau d'effort, ni le contexte. Un **mod Claude Code**,
+[`mod/claudetoy-statusline`](mod/claudetoy-statusline), les lit et les envoie à la carte par le **port USB** : modèle, effort,
+% de contexte et quotas 5 h / 7 j (uniquement ces champs : ni dossier de travail, ni dépôt Git). Il fonctionne dans
+Claude Desktop (onglet Code) comme dans la CLI, et n'affiche rien dans Claude.
 
 ```bash
 pip install pyserial
+claude plugin marketplace add neoisback431/ClaudeToy
+claude plugin install claudetoy-statusline@claudetoy
 ```
 
-Dans `~/.claude/settings.json` (réglages utilisateur de Claude Code) :
+Puis `claude plugin list` doit indiquer le plugin comme chargé ; relance Claude Desktop. Si tu avais un bloc `statusLine`
+pointant vers le script, retire-le de `~/.claude/settings.json` pour éviter un double envoi. Options du plugin (`/config`) :
+`python` (exécutable, `python` par défaut) et `refreshSeconds` (5 par défaut).
 
-```json
-"statusLine": {
-  "type": "command",
-  "command": "python C:/chemin/vers/mod/claudetoy-statusline/claudetoy_statusline.py",
-  "refreshInterval": 5
-}
-```
-
-Utilise des barres obliques `/` dans le chemin (Windows). Démarre une nouvelle session : la bague et la ligne de modèle apparaissent
-après la première réponse de Claude.
-
-- **Testé avec la CLI `claude`** : le script est appelé toutes les 5 secondes (`refreshInterval`), avec modèle, effort, contexte et quotas.
-  Je n'ai pas obtenu d'appel depuis l'onglet « Code » de Claude Desktop : pour alimenter la bague, utilise Claude Code en terminal.
+- **Testé avec Claude Desktop** : modèle, contexte, quotas et effort remontent sur la bague. Le mod a besoin d'une version de
+  Claude Code qui gère les mods ; sinon `claude plugin list` affiche une erreur de chargement.
+- **Sans le mod** (CLI seule) : le script [`claudetoy_statusline.py`](mod/claudetoy-statusline/claudetoy_statusline.py) peut aussi
+  servir de status line, dans `~/.claude/settings.json` :
+  `"statusLine": {"type": "command", "command": "python C:/chemin/vers/mod/claudetoy-statusline/claudetoy_statusline.py", "refreshInterval": 5}`
+  (barres obliques `/` sous Windows).
+- L'effort est lu à chaque requête au modèle : il reste vide jusqu'à la première réponse d'une session.
 - La carte doit être branchée en USB au PC qui exécute Claude Code. Si le port est occupé (flash, moniteur série) ou la carte absente,
   l'envoi est simplement ignoré.
 - Les quotas 5 h / 7 j ne sont fournis que pour les abonnements Pro et Max, et le contexte reste inconnu pendant la première minute
