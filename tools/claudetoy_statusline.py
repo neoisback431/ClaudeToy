@@ -16,6 +16,7 @@ Installation : pip install pyserial, puis dans ~/.claude/settings.json :
 """
 import json
 import os
+import re
 import sys
 import tempfile
 import time
@@ -31,11 +32,16 @@ def pct(value):
         return -1
 
 
+EFFORT_SHORT = {"medium": "med"}   # l'écran affiche 5 caractères au plus
+
+
 def short_model(name):
+    """« Claude Opus 4.8 (1M context) » -> « Opus 4.8 » (l'écran affiche 10 caractères)."""
     name = (name or "?").strip()
     if name.lower().startswith("claude "):
         name = name[7:]
-    return name[:15]
+    name = re.sub(r"\s*\([^)]*\)", "", name).strip()
+    return (name or "?")[:15]
 
 
 def find_port():
@@ -49,11 +55,23 @@ def find_port():
 LAST = os.path.join(tempfile.gettempdir(), "claudetoy_statusline.last")
 
 
+LOG = os.path.join(tempfile.gettempdir(), "claudetoy_statusline.log")
+
+
 def note(text):
-    """Dernier passage du script (utile pour vérifier que Claude Code l'exécute vraiment)."""
+    """Dernier passage du script + journal des 100 derniers (pour vérifier quand Claude Code l'exécute)."""
+    line = "%s %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), text)
     try:
         with open(LAST, "w", encoding="utf-8") as f:
-            f.write("%s %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), text))
+            f.write(line)
+        try:
+            with open(LOG, "r", encoding="utf-8") as f:
+                lines = f.readlines()[-99:]
+        except Exception:
+            lines = []
+        lines.append(line)
+        with open(LOG, "w", encoding="utf-8") as f:
+            f.writelines(lines)
     except Exception:
         pass
 
@@ -91,7 +109,8 @@ def main():
         data = {}
 
     model = short_model((data.get("model") or {}).get("display_name"))
-    effort = ((data.get("effort") or {}).get("level") or "")[:7]
+    effort = (data.get("effort") or {}).get("level") or ""
+    effort = EFFORT_SHORT.get(effort, effort)[:7]
     ctx = pct((data.get("context_window") or {}).get("used_percentage"))
     limits = data.get("rate_limits") or {}
     h5 = pct((limits.get("five_hour") or {}).get("used_percentage"))
@@ -101,7 +120,8 @@ def main():
 
     # Trace de diagnostic : noms des champs reçus et contenu de context_window (uniquement des nombres).
     cw = data.get("context_window")
-    raw_info = " | champs=%s | context_window=%s | effort=%s | rate_limits=%s" % (
+    sid = str(data.get("session_id") or "")[:8]
+    raw_info = " | session=" + sid + " | champs=%s | context_window=%s | effort=%s | rate_limits=%s" % (
         ",".join(sorted(data.keys())),
         json.dumps(cw, separators=(",", ":")) if isinstance(cw, dict) else cw,
         data.get("effort"),

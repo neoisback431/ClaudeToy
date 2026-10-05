@@ -88,10 +88,15 @@ Dans `~/.claude/settings.json` (réglages utilisateur de Claude Code) :
 Utilise des barres obliques `/` dans le chemin (Windows). Démarre une nouvelle session : la bague et la ligne de modèle apparaissent
 après la première réponse de Claude.
 
+- **Testé avec la CLI `claude`** : le script est appelé toutes les 5 secondes (`refreshInterval`), avec modèle, effort, contexte et quotas.
+  Je n'ai pas obtenu d'appel depuis l'onglet « Code » de Claude Desktop : pour alimenter la bague, utilise Claude Code en terminal.
 - La carte doit être branchée en USB au PC qui exécute Claude Code. Si le port est occupé (flash, moniteur série) ou la carte absente,
   l'envoi est simplement ignoré.
-- Les quotas 5 h / 7 j ne sont fournis que pour les abonnements Pro et Max.
+- Les quotas 5 h / 7 j ne sont fournis que pour les abonnements Pro et Max, et le contexte reste inconnu pendant la première minute
+  d'une session.
 - Avec plusieurs sessions, la dernière valeur reçue s'affiche.
+- L'effort est abrégé (`medium` devient `med`) et le nom du modèle est raccourci pour tenir à l'écran.
+- Le script garde ses 100 derniers passages dans `%TEMP%\claudetoy_statusline.log` (heure, session, valeurs envoyées) pour diagnostiquer.
 - Format du message (une ligne JSON) : `{"cc":{"m":"Opus 4.5","e":"high","c":42,"h":23,"d":41}}` (`-1` = inconnu).
 
 ## Nomenclature (BOM)
