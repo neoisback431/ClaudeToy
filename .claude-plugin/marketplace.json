@@ -1,0 +1,12 @@
+{
+  "name": "claudetoy",
+  "owner": { "name": "neoisback431" },
+  "description": "Mods Claude Code pour la bague ClaudeToy.",
+  "plugins": [
+    {
+      "name": "claudetoy-statusline",
+      "source": "./mod/claudetoy-statusline",
+      "description": "Pousse modèle, effort, contexte et quotas vers la bague ClaudeToy (USB), sans affichage."
+    }
+  ]
+}
