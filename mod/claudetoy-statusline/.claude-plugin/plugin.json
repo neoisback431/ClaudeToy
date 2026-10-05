@@ -1,6 +1,6 @@
 {
   "name": "claudetoy-statusline",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Pousse modèle, effort, contexte et quotas vers la bague ClaudeToy (port série USB), sans rien afficher.",
   "userConfig": {
     "python": {
