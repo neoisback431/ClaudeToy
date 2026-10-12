@@ -1,0 +1,19 @@
+{
+  "name": "claudetoy-statusline",
+  "version": "0.1.1",
+  "description": "Pousse modèle, effort, contexte et quotas vers la bague ClaudeToy (port série USB), sans rien afficher.",
+  "userConfig": {
+    "python": {
+      "type": "string",
+      "title": "Exécutable Python",
+      "description": "Commande Python qui a pyserial",
+      "default": "python"
+    },
+    "refreshSeconds": {
+      "type": "number",
+      "title": "Rafraîchissement (s)",
+      "description": "Intervalle d'envoi en plus de chaque fin de tour",
+      "default": 5
+    }
+  }
+}
